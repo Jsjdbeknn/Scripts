@@ -1,0 +1,89 @@
+local library = {flags = {}, windows = {}, open = true}
+
+-- Services
+local inputService = game:GetService("UserInputService")
+local tweenService = game:GetService("TweenService")
+
+-- Create function for easy object generation
+function library:Create(class, properties)
+    local obj = Instance.new(class)
+    for property, value in pairs(properties) do
+        obj[property] = value
+    end
+    return obj
+end
+
+-- UI Framework Setup
+local framework = {}
+
+function framework:CreateWindow(title)
+    local screenGui = library:Create("ScreenGui", {Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")})
+
+    local mainFrame = library:Create("Frame", {
+        Size = UDim2.new(0, 230, 0, 300),
+        Position = UDim2.new(0.5, -115, 0.5, -150),
+        BackgroundColor3 = Color3.fromRGB(40, 40, 40), -- Gray background
+        BorderSizePixel = 0,
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Parent = screenGui
+    })
+
+    -- Title Bar
+    local titleBar = library:Create("TextLabel", {
+        Size = UDim2.new(1, 0, 0, 30),
+        BackgroundColor3 = Color3.fromRGB(30, 30, 30), -- Darker gray for the title bar
+        BorderSizePixel = 0,
+        Text = title,
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        Font = Enum.Font.GothamBold,
+        TextSize = 16,
+        Parent = mainFrame
+    })
+
+    -- Make the UI draggable
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+
+    titleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = mainFrame.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    titleBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+
+    inputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+
+    return {
+        MainFrame = mainFrame,
+        ScreenGui = screenGui
+    }
+end
