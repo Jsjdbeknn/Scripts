@@ -1,14 +1,1 @@
-local message = "Sorry"
-local duration = 5
-local imageId = "rbxassetid://124635486840030"
 
-local function notifyPlayer(message, duration, imageId)
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "Disabled it for a while.";
-        Text = message;
-        Duration = duration;
-        Icon = imageId;
-    })
-end
-
-notifyPlayer(message, duration, imageId)
